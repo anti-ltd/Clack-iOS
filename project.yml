@@ -39,10 +39,14 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
     ENABLE_USER_SCRIPT_SANDBOXING: NO
 
-# Local SwiftPM dependency on the iOS UX library. iUX-ios lives one level up.
+# SwiftPM dependencies. iUX-ios is the local UX library one level up; LiveKit is
+# the SFU client that carries the actual voice — one room per channel.
 packages:
   iUX-ios:
     path: ../iUX-ios
+  LiveKit:
+    url: https://github.com/livekit/client-sdk-swift
+    from: "2.15.0"
 
 targets:
   Clack:
@@ -62,17 +66,41 @@ targets:
         # The gate for Apple's PushToTalk framework. Provisioning must carry
         # the matching capability (Automatic signing requests it from the team).
         com.apple.developer.push-to-talk: true
+        # PushToTalk rides APNs, so the app also needs the Push Notifications
+        # entitlement — without it PTChannelManager fails to instantiate with
+        # PTInstantiationErrorMissingPushServerEnvironment (error 3). Xcode
+        # rewrites `development` → `production` automatically for distribution
+        # builds; the matching PUSH_NOTIFICATIONS capability is on the App ID.
+        aps-environment: development
     info:
       path: Resources/Info.plist
       properties:
         CFBundleDisplayName: Clack
+        # Marketing version + build number. Declared here (not left to xcodegen
+        # defaults) so ASCManager can find and bump them — it greps project.yml
+        # for these two quoted keys, so keep the literal quoted values below.
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "4"
         ITSAppUsesNonExemptEncryption: false
         # PushToTalk delivers incoming transmissions while backgrounded; the
         # mic captures the user's own. Both strings are user-facing.
         NSMicrophoneUsageDescription: Clack uses the microphone so you can talk on your channels.
+        # On-device transcription of transmissions (live captions + history) so
+        # you can read what was said when a channel is noisy or mis-heard.
+        NSSpeechRecognitionUsageDescription: Clack transcribes channel transmissions so you can read what was said.
+        # LiveKit is a video-capable SDK, so its binary references camera APIs
+        # even though Clack is audio-only. Apple (ITMS-90683) requires the
+        # purpose string for the referenced API regardless of whether we call it.
+        NSCameraUsageDescription: Clack does not use the camera.
+        # Lone-worker safety: share live location with the channel + keep an 8h
+        # trail. "Always" so tracking continues when the phone is pocketed and
+        # the app is backgrounded — the whole point for solo workers.
+        NSLocationWhenInUseUsageDescription: Clack shares your location with your channel so teammates can see where you are.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Clack shares your location with your channel — including in the background — so teammates can keep track of solo workers for safety.
         UIBackgroundModes:
           - push-to-talk
           - audio
+          - location
         # clack:// deep links (channel invites / marketing capture).
         CFBundleURLTypes:
           - CFBundleURLName: ltd.anti.clack
@@ -95,6 +123,8 @@ targets:
     dependencies:
       - package: iUX-ios
         product: iUXiOS
+      - package: LiveKit
+        product: LiveKit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ltd.anti.clack

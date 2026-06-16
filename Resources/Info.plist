@@ -30,11 +30,19 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>4</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Clack does not use the camera.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Clack shares your location with your channel — including in the background — so teammates can keep track of solo workers for safety.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Clack shares your location with your channel so teammates can see where you are.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Clack uses the microphone so you can talk on your channels.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Clack transcribes channel transmissions so you can read what was said.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -44,6 +52,7 @@
 	<array>
 		<string>push-to-talk</string>
 		<string>audio</string>
+		<string>location</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

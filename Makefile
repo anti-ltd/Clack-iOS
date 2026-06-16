@@ -117,6 +117,7 @@ DEVICE_UDID = $(shell \
 		xcrun devicectl list devices 2>/dev/null \
 			| awk -v name="$(DEVICE_NAME)" '\
 				/^----/ {next} \
+				/simulated/ {next} \
 				name != "" && index($$0, name) == 0 {next} \
 				{ \
 					if (match($$0, /[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}/)) { \
